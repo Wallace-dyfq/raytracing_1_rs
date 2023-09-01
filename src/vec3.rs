@@ -35,13 +35,13 @@ impl Vec3 {
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
-    pub fn dot(&self, rhs: Self) -> f64 {
+    pub fn dot(&self, rhs: &Self) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
     pub fn cross(&self, rhs: Self) -> Self {
         Vec3 {
             x: self.y * rhs.z - self.z * rhs.y,
-            y: self.x * rhs.z - self.z * rhs.x,
+            y: self.z * rhs.x - self.x * rhs.z,
             z: self.x * rhs.y - self.y * rhs.x,
         }
     }
@@ -285,11 +285,11 @@ mod tests {
         let x: f64 = 4.0;
         assert_eq!(
             v / x,
-            Some(Vec3 {
+            Vec3 {
                 x: 0.25,
                 y: 0.5,
                 z: 0.75,
-            })
+            }
         );
     }
     #[test]
@@ -297,7 +297,7 @@ mod tests {
         let v1 = Vec3::new(1.0, 2.0, 3.0);
         let v2 = Vec3::new(4.0, 5.0, 3.0);
         assert_eq!(
-            v1 * v2,
+            &v1 * &v2,
             Vec3 {
                 x: 4.0,
                 y: 10.0,
@@ -337,7 +337,7 @@ mod tests {
     fn test_add_assign() {
         let mut v1 = Vec3::new(1.0, 2.0, 3.0);
         let mut v2 = Vec3::new(10.0, 20.0, 30.0);
-        v1 += v2;
+        v1 += &v2;
         assert_eq!(
             v1,
             Vec3 {
@@ -346,5 +346,17 @@ mod tests {
                 z: 33.0
             }
         );
+    }
+    #[test]
+    fn test_length() {
+        let mut v1 = Vec3::new(3.0, 4.0, 0.0);
+        assert_eq!(v1.length(), 5.0);
+    }
+
+    #[test]
+    fn test_dot() {
+        let mut v1 = Vec3::new(3.0, 4.0, 8.0);
+        let mut v2 = Vec3::new(2.0, 4.0, 0.0);
+        assert_eq!(v1.dot(&v2), 22.0);
     }
 }
