@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops;
 
 #[derive(Default, Debug, PartialEq)]
-struct Vec3 {
+pub struct Vec3 {
     x: f64,
     y: f64,
     z: f64,
@@ -13,13 +13,13 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
-    pub fn x(&mut self) -> f64 {
+    pub fn x(&self) -> f64 {
         self.x
     }
-    pub fn y(&mut self) -> f64 {
+    pub fn y(&self) -> f64 {
         self.y
     }
-    pub fn z(&mut self) -> f64 {
+    pub fn z(&self) -> f64 {
         self.z
     }
 
