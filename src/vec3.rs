@@ -48,7 +48,6 @@ impl fmt::Display for Vec3 {
     }
 }
 
-
 impl ops::Add<Vec3> for Vec3 {
     type Output = Vec3;
 
@@ -103,7 +102,7 @@ impl ops::Sub for Vec3 {
         }
     }
 }
-impl ops::Sub<Vec3>  for &Vec3 {
+impl ops::Sub<Vec3> for &Vec3 {
     type Output = Vec3;
 
     fn sub(self, rhs: Vec3) -> Self::Output {
