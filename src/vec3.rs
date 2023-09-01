@@ -48,7 +48,8 @@ impl fmt::Display for Vec3 {
     }
 }
 
-impl ops::Add for Vec3 {
+
+impl ops::Add<Vec3> for Vec3 {
     type Output = Vec3;
 
     fn add(self, rhs: Vec3) -> Self::Output {
@@ -59,8 +60,30 @@ impl ops::Add for Vec3 {
         }
     }
 }
-impl ops::AddAssign for Vec3 {
-    fn add_assign(&mut self, other: Self) {
+impl ops::Add<Vec3> for &Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+impl ops::Add for &Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: &Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+impl ops::AddAssign<&Vec3> for Vec3 {
+    fn add_assign(&mut self, other: &Self) {
         *self = Self {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -80,8 +103,30 @@ impl ops::Sub for Vec3 {
         }
     }
 }
-impl ops::SubAssign for Vec3 {
-    fn sub_assign(&mut self, rhs: Self) {
+impl ops::Sub<Vec3>  for &Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+impl ops::Sub for &Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: &Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+impl ops::SubAssign<&Vec3> for Vec3 {
+    fn sub_assign(&mut self, rhs: &Self) {
         *self = Self {
             x: self.x - rhs.x,
             y: self.y - rhs.y,
@@ -91,17 +136,32 @@ impl ops::SubAssign for Vec3 {
 }
 
 impl ops::Div<f64> for Vec3 {
-    type Output = Option<Vec3>;
+    type Output = Vec3;
 
     fn div(self, rhs: f64) -> Self::Output {
         if rhs == 0.0 {
-            None
+            panic!("cannot divide by zero")
         } else {
-            Some(Vec3 {
+            Vec3 {
                 x: self.x / rhs,
                 y: self.y / rhs,
                 z: self.z / rhs,
-            })
+            }
+        }
+    }
+}
+impl ops::Div<f64> for &Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        if rhs == 0.0 {
+            panic!("cannot divide by zero")
+        } else {
+            Vec3 {
+                x: self.x / rhs,
+                y: self.y / rhs,
+                z: self.z / rhs,
+            }
         }
     }
 }
@@ -127,10 +187,21 @@ impl ops::Mul<f64> for Vec3 {
         }
     }
 }
-impl ops::Mul for Vec3 {
+impl ops::Mul<f64> for &Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: Vec3) -> Self::Output {
+    fn mul(self, rhs: f64) -> Self::Output {
+        Vec3 {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
+    }
+}
+impl ops::Mul for &Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: &Vec3) -> Self::Output {
         Vec3 {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
