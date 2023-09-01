@@ -1,10 +1,10 @@
-mod vec3;
 mod color;
+mod vec3;
 use std::env;
 
-use vec3::Vec3;
 use color::write_color;
 use color::Color;
+use vec3::Vec3;
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 fn main() {

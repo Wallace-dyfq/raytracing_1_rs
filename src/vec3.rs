@@ -262,7 +262,7 @@ mod tests {
     fn test_add_assign() {
         let mut v1 = Vec3::new(1.0, 2.0, 3.0);
         let mut v2 = Vec3::new(10.0, 20.0, 30.0);
-        v1 += v2 ;
+        v1 += v2;
         assert_eq!(
             v1,
             Vec3 {
