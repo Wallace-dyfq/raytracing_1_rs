@@ -49,9 +49,6 @@ fn main() {
 
     for i in 0..image_height {
         for j in 0..image_width {
-            let r = i as f64 / (image_height - 1) as f64;
-            let g = j as f64 / (image_width - 1) as f64;
-            let b = 0.0;
             let pixel_center =
                 &pixel00_loc + (&pixel_delta_u * i as f64) + (&pixel_delta_v * j as f64);
 
