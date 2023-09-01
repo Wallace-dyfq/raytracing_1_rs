@@ -2,6 +2,7 @@ use crate::vec3::Vec3;
 use crate::Result;
 use std::io::Write;
 pub type Color = Vec3;
+// each value in color need to be from 0 to 1
 pub fn write_color<W>(writer: &mut W, c: &Color) -> Result<()>
 where
     W: Write,
