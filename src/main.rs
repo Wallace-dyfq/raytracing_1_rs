@@ -10,8 +10,23 @@ use vec3::{unit_vector, Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+    let oc = &ray.orig - center;
+    let a = ray.dir.dot(&ray.dir);
+    let b = 2.0 * oc.dot(&ray.dir);
+    let c = oc.dot(&oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant >= 0.0
+}
+
 // return all black for now
 fn ray_color(ray: &ray::Ray) -> Color {
+    // sphere parameters
+    let center = Point3::new(0.0, 0.0, -1.0);
+    let radius = 0.25;
+    if hit_sphere(&center, radius, ray) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
     let unit_direction = unit_vector(&ray.dir);
     let a = 0.5 * (unit_direction.y() + 1.0);
 
@@ -46,13 +61,15 @@ fn main() {
 
     let pixel00_loc = &viewport_upper_left + (&pixel_delta_u + &pixel_delta_v) * 0.5;
     println!("P3\n{} {}\n255", image_width, image_height);
+    //    eprintln!("aspect_ratio: {}, viewport_height: {}, viewport_width: {}\nviewport_u: {}, viewport_v: {}\npixel_delta_u:{}, pixel_delta_v:{}\nview_port_upper_left: {}, pixel00_loc: {}", aspect_ratio, viewport_height, viewport_width, viewport_u, viewport_v, pixel_delta_u, pixel_delta_v, viewport_upper_left, pixel00_loc);
 
-    for i in 0..image_height {
-        for j in 0..image_width {
+    for j in 0..image_height {
+        for i in 0..image_width {
             let pixel_center =
                 &pixel00_loc + (&pixel_delta_u * i as f64) + (&pixel_delta_v * j as f64);
 
-            let ray_direction = &pixel_center - &camera_center;
+            //let ray_direction = &pixel_center - &camera_center;
+            let ray_direction = &camera_center - &pixel_center;
             let ray = Ray {
                 orig: camera_center.clone(),
                 dir: ray_direction,
