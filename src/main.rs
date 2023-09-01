@@ -6,13 +6,16 @@ use std::env;
 use color::write_color;
 use color::Color;
 use ray::Ray;
-use vec3::{Point3, Vec3};
+use vec3::{unit_vector, Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
 // return all black for now
 fn ray_color(ray: &ray::Ray) -> Color {
-    Color::default()
+    let unit_direction = unit_vector(&ray.dir);
+    let a = 0.5 * (unit_direction.y() + 1.0);
+
+    Color::new(1.0, 1.0, 1.0) * (1.0 - a) + Color::new(0.5, 0.7, 1.0) * a
 }
 
 fn main() {

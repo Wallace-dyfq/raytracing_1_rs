@@ -7,7 +7,12 @@ pub struct Vec3 {
     y: f64,
     z: f64,
 }
+
 pub type Point3 = Vec3;
+
+pub fn unit_vector(v: &Vec3) -> Vec3 {
+    v / v.length()
+}
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
