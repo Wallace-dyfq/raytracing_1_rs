@@ -1,39 +1,28 @@
 mod color;
+mod hittables;
 mod ray;
+mod sphere;
+mod traits;
+mod utils;
 mod vec3;
 use std::env;
 
 use color::write_color;
 use color::Color;
+use hittables::Hittables;
 use ray::Ray;
+use sphere::Sphere;
+use traits::{HitRecord, Hittable};
+use utils::*;
 use vec3::{unit_vector, Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
-    let oc = &ray.orig - center;
-    let a = ray.dir.dot(&ray.dir);
-    let half_b = oc.dot(&ray.dir);
-    let c = oc.dot(&oc) - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0 {
-        return -1.0;
-    } else {
-        let result = (-half_b - discriminant.sqrt()) / a;
-        return result;
-    }
-}
-
 // return all black for now
-fn ray_color(ray: &ray::Ray) -> Color {
-    // sphere parameters
-    let center = Point3::new(0.0, 0.0, -1.0);
-    let radius = 0.5;
-    let t = hit_sphere(&center, radius, ray);
-    if t > 0.0 {
-        let tmp = &ray.at(t) - &center;
-        let n = unit_vector(&tmp);
-        return Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
+fn ray_color(ray: &ray::Ray, hittables: &Hittables) -> Color {
+    let mut rec = HitRecord::default();
+    if hittables.hit(&ray, 0.0, INFINITY, &mut rec) {
+        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
     let unit_direction = unit_vector(&ray.dir);
     let a = 0.5 * (unit_direction.y() + 1.0);
@@ -47,6 +36,14 @@ fn main() {
     let image_width = 400;
     // calculate the image height, and ensure that it is at least 1
     let image_height = ((image_width as f64 / aspect_ratio) as u32).max(1);
+
+    // world
+    let world: Hittables = Hittables {
+        objects: vec![
+            Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)),
+            Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)),
+        ],
+    };
 
     // camera
     let viewport_height = 2.0;
@@ -68,6 +65,7 @@ fn main() {
         &camera_center - &Vec3::new(0.0, 0.0, focal_length) - &viewport_u / 2.0 - &viewport_v / 2.0;
 
     let pixel00_loc = &viewport_upper_left + (&pixel_delta_u + &pixel_delta_v) * 0.5;
+
     println!("P3\n{} {}\n255", image_width, image_height);
     //    eprintln!("aspect_ratio: {}, viewport_height: {}, viewport_width: {}\nviewport_u: {}, viewport_v: {}\npixel_delta_u:{}, pixel_delta_v:{}\nview_port_upper_left: {}, pixel00_loc: {}", aspect_ratio, viewport_height, viewport_width, viewport_u, viewport_v, pixel_delta_u, pixel_delta_v, viewport_upper_left, pixel00_loc);
 
@@ -81,7 +79,7 @@ fn main() {
                 orig: camera_center.clone(),
                 dir: ray_direction,
             };
-            let pixel_color = ray_color(&ray);
+            let pixel_color = ray_color(&ray, &world);
 
             let _ = write_color(&mut std::io::stdout(), &pixel_color);
         }
