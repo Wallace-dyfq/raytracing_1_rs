@@ -4,7 +4,8 @@ use crate::{unit_vector, Color, HitRecord, Hittable, Hittables, Interval, Point3
 #[derive(Debug, Default)]
 pub struct Camera {
     pub aspect_ratio: f64,
-    pub image_width: u32, // number of pixels
+    pub image_width: u32,       // number of pixels
+    pub samples_per_pixel: u32, // number of pixels
     image_height: u32,
     center: Point3, // Camera center
     pixel00_loc: Point3,
@@ -13,10 +14,11 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32) -> Self {
+    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Self {
         let mut camera = Camera::default();
         camera.aspect_ratio = aspect_ratio;
         camera.image_width = image_width;
+        camera.samples_per_pixel = samples_per_pixel;
         camera.initialize();
         camera
     }
@@ -34,11 +36,33 @@ impl Camera {
                     orig: self.center.clone(),
                     dir: ray_direction,
                 };
-                let pixel_color = self.ray_color(&ray, &world);
+                let mut pixel_color = Color::default();
+                for sample in 0..self.samples_per_pixel {
+                    let r = self.get_ray(i, j);
+                    pixel_color += &self.ray_color(&r, world);
+                }
 
-                let _ = write_color(&mut std::io::stdout(), &pixel_color);
+                let _ = write_color(&mut std::io::stdout(), &pixel_color, self.samples_per_pixel);
             }
         }
+    }
+
+    fn get_ray(&self, i: u32, j: u32) -> Ray {
+        let pixel_center =
+            &self.pixel00_loc + (&self.pixel_delta_u * i as f64) + (&self.pixel_delta_v * j as f64);
+        let pixel_sample = &pixel_center + self.pixel_sample_square();
+        let ray_origin = self.center.clone();
+        let ray_direction = &pixel_sample - &ray_origin;
+        return Ray {
+            orig: ray_origin,
+            dir: ray_direction,
+        };
+    }
+
+    fn pixel_sample_square(&self) -> Vec3 {
+        let px = -0.5 + random_f64();
+        let py = -0.5 + random_f64();
+        return (&self.pixel_delta_u * px) + (&self.pixel_delta_v * py);
     }
 
     fn initialize(&mut self) {
