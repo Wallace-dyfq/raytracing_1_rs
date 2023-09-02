@@ -10,22 +10,30 @@ use vec3::{unit_vector, Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
     let oc = &ray.orig - center;
     let a = ray.dir.dot(&ray.dir);
     let b = 2.0 * oc.dot(&ray.dir);
     let c = oc.dot(&oc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
-    discriminant >= 0.0
+    if discriminant < 0.0 {
+        return -1.0;
+    } else {
+        let result = (-b - discriminant.sqrt()) / (2.0 * a);
+        return result;
+    }
 }
 
 // return all black for now
 fn ray_color(ray: &ray::Ray) -> Color {
     // sphere parameters
     let center = Point3::new(0.0, 0.0, -1.0);
-    let radius = 0.25;
-    if hit_sphere(&center, radius, ray) {
-        return Color::new(1.0, 0.0, 0.0);
+    let radius = 0.5;
+    let t = hit_sphere(&center, radius, ray);
+    if t > 0.0 {
+        let tmp = &ray.at(t) - &center;
+        let n = unit_vector(&tmp);
+        return Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
     }
     let unit_direction = unit_vector(&ray.dir);
     let a = 0.5 * (unit_direction.y() + 1.0);
@@ -68,8 +76,7 @@ fn main() {
             let pixel_center =
                 &pixel00_loc + (&pixel_delta_u * i as f64) + (&pixel_delta_v * j as f64);
 
-            //let ray_direction = &pixel_center - &camera_center;
-            let ray_direction = &camera_center - &pixel_center;
+            let ray_direction = &pixel_center - &camera_center;
             let ray = Ray {
                 orig: camera_center.clone(),
                 dir: ray_direction,
