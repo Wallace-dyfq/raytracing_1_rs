@@ -1,5 +1,6 @@
 mod color;
 mod hittables;
+mod interval;
 mod ray;
 mod sphere;
 mod traits;
@@ -10,6 +11,7 @@ use std::env;
 use color::write_color;
 use color::Color;
 use hittables::Hittables;
+use interval::Interval;
 use ray::Ray;
 use sphere::Sphere;
 use traits::{HitRecord, Hittable};
@@ -21,7 +23,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 // return all black for now
 fn ray_color(ray: &ray::Ray, hittables: &Hittables) -> Color {
     let mut rec = HitRecord::default();
-    if hittables.hit(&ray, 0.0, INFINITY, &mut rec) {
+    if hittables.hit(&ray, &mut Interval::new(0.0, INFINITY), &mut rec) {
         return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
     let unit_direction = unit_vector(&ray.dir);
