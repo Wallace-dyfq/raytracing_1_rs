@@ -1,7 +1,7 @@
 use crate::utils::*;
 use crate::write_color;
 use crate::Scatter;
-use crate::{unit_vector, Color, HitRecord, Hittable, Hittables, Interval, Point3, Ray, Vec3};
+use crate::{Color, HitRecord, Hittable, Hittables, Interval, Point3, Ray, Vec3};
 #[derive(Debug, Default)]
 pub struct Camera {
     pub aspect_ratio: f64,
@@ -115,7 +115,7 @@ impl Camera {
             }
             return Color::default();
         }
-        let unit_direction = unit_vector(&ray.dir);
+        let unit_direction = Vec3::unit_vector(&ray.dir);
         let a = 0.5 * (unit_direction.y() + 1.0);
 
         Color::new(1.0, 1.0, 1.0) * (1.0 - a) + Color::new(0.5, 0.7, 1.0) * a

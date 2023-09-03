@@ -6,14 +6,19 @@ use crate::Vec3;
 // diffusive
 #[derive(Default, Debug, Clone)]
 pub struct Lambertian {
-    pub albedo: Color,
+    albedo: Color,
 }
 
 // reflective
 #[derive(Default, Debug, Clone)]
 pub struct Metal {
-    pub albedo: Color,
+    albedo: Color,
     fuzz: f64,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct Dielectric {
+    ir: f64, // index of reflection
 }
 
 impl Lambertian {
@@ -37,7 +42,7 @@ impl Scatter for Lambertian {
             orig: rec.point.clone(),
             dir: scatter_direction,
         };
-        *attenuation = self.albedo.clone();
+        attenuation.set_with_other(&self.albedo);
         true
     }
 }
@@ -63,7 +68,39 @@ impl Scatter for Metal {
             orig: rec.point.clone(),
             dir: reflected + Vec3::random_unit_vec3() * self.fuzz,
         };
-        *attenuation = self.albedo.clone();
+        attenuation.set_with_other(&self.albedo);
+        true
+    }
+}
+
+impl Dielectric {
+    pub fn new(ir: f64) -> Self {
+        Self { ir }
+    }
+}
+
+impl Scatter for Dielectric {
+    fn scatter(
+        &self,
+        ray_in: &Ray,
+        rec: &crate::hittables::HitRecord,
+        attenuation: &mut Color,
+        ray_scattered: &mut Ray,
+    ) -> bool {
+        attenuation.set(1.0, 1.0, 1.0);
+
+        let refraction_ratio = if rec.front_face {
+            1.0 / self.ir
+        } else {
+            self.ir
+        };
+        let unit_direction = ray_in.dir.make_unit_vector();
+        let refracted = Vec3::refract(&unit_direction, &rec.normal, refraction_ratio);
+        *ray_scattered = Ray {
+            orig: rec.point.clone(),
+            dir: refracted,
+        };
+
         true
     }
 }

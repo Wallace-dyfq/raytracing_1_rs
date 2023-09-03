@@ -15,12 +15,12 @@ use color::write_color;
 use color::Color;
 use hittables::{HitRecord, Hittables};
 use interval::Interval;
-use material::{Lambertian, Metal};
+use material::{Dielectric, Lambertian, Metal};
 use ray::Ray;
 use sphere::Sphere;
 use std::rc::Rc;
 use traits::{Hittable, Scatter};
-use vec3::{unit_vector, Point3, Vec3};
+use vec3::{Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -28,8 +28,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     //meterial
     let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
-    let material_left = Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8), 0.3));
+    let material_center = Rc::new(Dielectric::new(1.5));
+    let material_left = Rc::new(Dielectric::new(1.5));
     let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
     // world
     let world: Hittables = Hittables {
@@ -58,6 +58,6 @@ fn main() {
     };
 
     // camera
-    let camera = Camera::new(16.0 / 9.0, 400, 50, 50);
+    let camera = Camera::new(16.0 / 9.0, 400, 100, 50);
     camera.render(&world);
 }

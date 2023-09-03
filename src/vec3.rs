@@ -11,9 +11,6 @@ pub struct Vec3 {
 
 pub type Point3 = Vec3;
 
-pub fn unit_vector(v: &Vec3) -> Vec3 {
-    v / v.length()
-}
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
@@ -27,6 +24,17 @@ impl Vec3 {
     }
     pub fn z(&self) -> f64 {
         self.z
+    }
+
+    pub fn set(&mut self, x: f64, y: f64, z: f64) {
+        self.x = x;
+        self.y = y;
+        self.z = z;
+    }
+    pub fn set_with_other(&mut self, other: &Self) {
+        self.x = other.x;
+        self.y = other.y;
+        self.z = other.z;
     }
 
     pub fn length(&self) -> f64 {
@@ -46,6 +54,13 @@ impl Vec3 {
             z: self.x * rhs.y - self.y * rhs.x,
         }
     }
+
+    pub fn make_unit_vector(&self) -> Self {
+        self / self.length()
+    }
+    pub fn unit_vector(v: &Vec3) -> Self {
+        v / v.length()
+    }
     // generate a random Vec3 where each element is between min and max
     pub fn random(min: f64, max: f64) -> Self {
         Vec3 {
@@ -64,7 +79,7 @@ impl Vec3 {
         }
     }
     pub fn random_unit_vec3() -> Self {
-        return unit_vector(&Self::random_in_unit_sphere());
+        return Self::unit_vector(&Self::random_in_unit_sphere());
     }
     pub fn random_unit_on_hemisphere(normal: &Vec3) -> Self {
         let on_unit_sphere = Self::random_unit_vec3();
@@ -84,6 +99,17 @@ impl Vec3 {
     pub fn reflect(v: &Vec3, n: &Vec3) -> Self {
         let tmplength = 2.0 * v.dot(&n);
         v - &(n * tmplength)
+    }
+
+    pub fn reverse(&self) -> Self {
+        self * (-1.0)
+    }
+
+    pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Self {
+        let cos_theta = uv.reverse().dot(n).min(1.0);
+        let r_out_perp: Vec3 = etai_over_etat * (uv + cos_theta * n);
+        let r_out_parallel = -(1.0 - r_out_perp.length_squared()).sqrt() * n;
+        r_out_perp + r_out_parallel
     }
 }
 
@@ -220,6 +246,28 @@ impl ops::DivAssign<f64> for Vec3 {
     }
 }
 
+impl ops::Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: rhs.x * self,
+            y: rhs.y * self,
+            z: rhs.z * self,
+        }
+    }
+}
+impl ops::Mul<&Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: &Vec3) -> Self::Output {
+        Vec3 {
+            x: rhs.x * self,
+            y: rhs.y * self,
+            z: rhs.z * self,
+        }
+    }
+}
 impl ops::Mul<f64> for Vec3 {
     type Output = Vec3;
 

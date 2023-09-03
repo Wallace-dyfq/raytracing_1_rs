@@ -32,7 +32,7 @@ impl HitRecord {
         self.normal = match self.front_face {
             true => outward_normal.clone(),
             _ => outward_normal * -1.0,
-        }
+        };
     }
 }
 #[derive(Default)]
