@@ -104,7 +104,7 @@ impl Camera {
         }
         let mut rec = HitRecord::default();
         if hittables.hit(&ray, &mut Interval::new(0.001, INFINITY), &mut rec) {
-            let direction = Vec3::random_unit_on_hemisphere(&rec.normal);
+            let direction = &rec.normal + Vec3::random_unit_vec3();
             let new_ray = Ray {
                 orig: rec.point.clone(),
                 dir: direction,
