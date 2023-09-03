@@ -111,7 +111,6 @@ impl Camera {
             };
 
             return self.ray_color(&new_ray, depth - 1, hittables) * 0.5;
-            //return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
         }
         let unit_direction = unit_vector(&ray.dir);
         let a = 0.5 * (unit_direction.y() + 1.0);

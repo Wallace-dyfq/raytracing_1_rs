@@ -8,6 +8,11 @@ const COLOR_INTERVAL: Interval = Interval {
     min: 0.0,
     max: 0.9999,
 };
+
+fn linear_to_gamma(linear_component: f64) -> f64 {
+    linear_component.sqrt()
+}
+
 pub fn write_color<W>(writer: &mut W, c: &Color, samples_per_pixel: u32) -> Result<()>
 where
     W: Write,
@@ -16,6 +21,11 @@ where
     let r = c.x() / samples_per_pixel as f64;
     let g = c.y() / samples_per_pixel as f64;
     let b = c.z() / samples_per_pixel as f64;
+
+    // apply linear to gamma transform
+    let r = linear_to_gamma(r);
+    let g = linear_to_gamma(g);
+    let b = linear_to_gamma(b);
 
     write!(
         writer,
