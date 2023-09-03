@@ -68,7 +68,7 @@ fn main() {
         400,  /* iamge width*/
         100,  /* sample per pixel */
         50,   /* max depth */
-        50.0, /* vfov */
+        20.0, /* vfov */
     );
     camera.look_from = Point3::new(-2.0, 2.0, 1.0);
     camera.look_at = Point3::new(0.0, 0.0, -1.0);

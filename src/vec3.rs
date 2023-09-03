@@ -65,6 +65,20 @@ impl Vec3 {
     pub fn unit_vector(v: &Vec3) -> Self {
         v / v.length()
     }
+
+    // generate a random Vec3 that is within unit disk, i.e., with length < 1
+    pub fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Vec3 {
+                x: random_f64_range(-1.0, 1.0),
+                y: random_f64_range(-1.0, 1.0),
+                z: random_f64_range(-1.0, 1.0),
+            };
+            if p.length() < 1.0 {
+                return p;
+            }
+        }
+    }
     // generate a random Vec3 where each element is between min and max
     pub fn random(min: f64, max: f64) -> Self {
         Vec3 {
