@@ -1,8 +1,8 @@
+use crate::utils::random_f64;
 use crate::Color;
 use crate::Ray;
 use crate::Scatter;
 use crate::Vec3;
-use crate::utils::random_f64;
 
 // diffusive
 #[derive(Default, Debug, Clone)]
@@ -83,8 +83,7 @@ impl Dielectric {
         // use Schlick's approximation for reflectance
         let r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
         let r0 = r0.powi(2);
-        r0 + (1.0-r0)*(1.0 - cosine).powi(5)
-
+        r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
     }
 }
 
@@ -107,11 +106,12 @@ impl Scatter for Dielectric {
         let cos_theta = unit_direction.reverse().dot(&rec.normal).min(1.0);
         let sin_theta = (1.0 - cos_theta.powi(2)).sqrt();
         let can_reflect = refraction_ratio * sin_theta > 1.0;
-        let direction = if can_reflect || Self::reflectance(cos_theta, refraction_ratio) > random_f64()  {
-            Vec3::reflect(&unit_direction, &rec.normal)
-        } else {
-            Vec3::refract(&unit_direction, &rec.normal, refraction_ratio)
-        };
+        let direction =
+            if can_reflect || Self::reflectance(cos_theta, refraction_ratio) > random_f64() {
+                Vec3::reflect(&unit_direction, &rec.normal)
+            } else {
+                Vec3::refract(&unit_direction, &rec.normal, refraction_ratio)
+            };
         *ray_scattered = Ray {
             orig: rec.point.clone(),
             dir: direction,

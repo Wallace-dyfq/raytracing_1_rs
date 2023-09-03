@@ -8,6 +8,7 @@ pub struct Camera {
     pub image_width: u32,       // number of pixels
     pub samples_per_pixel: u32, // number of pixels
     pub max_depth: i32,         // maximum number of ray bounces into scene
+    pub vfov: f64,              // vertical view angle (field of view)
     image_height: u32,
     center: Point3, // Camera center
     pixel00_loc: Point3,
@@ -21,12 +22,14 @@ impl Camera {
         image_width: u32,
         samples_per_pixel: u32,
         max_depth: i32,
+        vfof: f64,
     ) -> Self {
         let mut camera = Camera::default();
         camera.aspect_ratio = aspect_ratio;
         camera.image_width = image_width;
         camera.samples_per_pixel = samples_per_pixel;
         camera.max_depth = max_depth;
+        camera.vfov = vfof;
         camera.initialize();
         camera
     }
@@ -76,12 +79,15 @@ impl Camera {
     fn initialize(&mut self) {
         self.image_height = ((self.image_width as f64 / self.aspect_ratio) as u32).max(1);
 
+        // determine viewport dimensions
+        let focal_length = 1.0;
         self.center = Point3::new(0.0, 0.0, 0.0);
+        let theta = degrees_to_radians(self.vfov);
+        let h = f64::tan(theta / 2.0);
 
-        let viewport_height = 2.0;
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (self.image_width as f64 / self.image_height as f64);
 
-        let focal_length = 1.0;
         // calculate the vector across the horizontal and down the vertical view edge
         let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
         let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
