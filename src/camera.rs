@@ -94,7 +94,14 @@ impl Camera {
     fn ray_color(&self, ray: &Ray, hittables: &Hittables) -> Color {
         let mut rec = HitRecord::default();
         if hittables.hit(&ray, &mut Interval::new(0.0, INFINITY), &mut rec) {
-            return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
+            let direction = Vec3::random_unit_on_hemisphere(&rec.normal);
+            let new_ray = Ray {
+                orig: rec.point.clone(),
+                dir: direction,
+            };
+
+            return self.ray_color(&new_ray, hittables) * 0.5;
+            //return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
         }
         let unit_direction = unit_vector(&ray.dir);
         let a = 0.5 * (unit_direction.y() + 1.0);

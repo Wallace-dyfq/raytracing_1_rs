@@ -1,3 +1,4 @@
+use crate::utils::random_f64_range;
 use std::fmt;
 use std::ops;
 
@@ -43,6 +44,35 @@ impl Vec3 {
             x: self.y * rhs.z - self.z * rhs.y,
             y: self.z * rhs.x - self.x * rhs.z,
             z: self.x * rhs.y - self.y * rhs.x,
+        }
+    }
+    // generate a random Vec3 where each element is between min and max
+    pub fn random(min: f64, max: f64) -> Self {
+        Vec3 {
+            x: random_f64_range(min, max),
+            y: random_f64_range(min, max),
+            z: random_f64_range(min, max),
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random(-1.0, 1.0);
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+    pub fn random_unit_vec3() -> Self {
+        return unit_vector(&Self::random_in_unit_sphere());
+    }
+    pub fn random_unit_on_hemisphere(normal: &Vec3) -> Self {
+        let on_unit_sphere = Self::random_unit_vec3();
+        if on_unit_sphere.dot(normal) > 0.0 {
+            // in the same hemisphere as the normal
+            return on_unit_sphere;
+        } else {
+            return on_unit_sphere * -1.0;
         }
     }
 }

@@ -27,7 +27,7 @@ fn main() {
     let world: Hittables = Hittables {
         objects: vec![
             Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)),
-            Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)),
+            Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 20.0)),
         ],
     };
 
