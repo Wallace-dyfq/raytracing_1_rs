@@ -141,8 +141,7 @@ impl Camera {
         if depth == 0 {
             return Color::default();
         }
-        let mut rec = HitRecord::new();
-        if hittables.hit(&ray, &mut Interval::new(0.001, INFINITY), &mut rec) {
+        if let Some(rec) = hittables.hit(&ray, &mut Interval::new(0.001, INFINITY)) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::default();
             if rec
