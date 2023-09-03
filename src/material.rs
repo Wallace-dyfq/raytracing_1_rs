@@ -13,8 +13,14 @@ pub struct Lambertian {
 #[derive(Default, Debug, Clone)]
 pub struct Metal {
     pub albedo: Color,
+    fuzz: f64,
 }
 
+impl Lambertian {
+    pub fn new(color: Color) -> Self {
+        Self { albedo: color }
+    }
+}
 impl Scatter for Lambertian {
     fn scatter(
         &self,
@@ -35,6 +41,15 @@ impl Scatter for Lambertian {
         true
     }
 }
+
+impl Metal {
+    pub fn new(color: Color, fuzz: f64) -> Self {
+        Self {
+            albedo: color,
+            fuzz,
+        }
+    }
+}
 impl Scatter for Metal {
     fn scatter(
         &self,
@@ -46,7 +61,7 @@ impl Scatter for Metal {
         let reflected = Vec3::reflect(&ray_in.dir, &rec.normal);
         *ray_scattered = Ray {
             orig: rec.point.clone(),
-            dir: reflected,
+            dir: reflected + Vec3::random_unit_vec3() * self.fuzz,
         };
         *attenuation = self.albedo.clone();
         true
