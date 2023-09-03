@@ -95,10 +95,17 @@ impl Scatter for Dielectric {
             self.ir
         };
         let unit_direction = ray_in.dir.make_unit_vector();
-        let refracted = Vec3::refract(&unit_direction, &rec.normal, refraction_ratio);
+        let cos_theta = unit_direction.reverse().dot(&rec.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta.powi(2)).sqrt();
+        let can_reflect = refraction_ratio * sin_theta > 1.0;
+        let direction = if can_reflect {
+            Vec3::reflect(&unit_direction, &rec.normal)
+        } else {
+            Vec3::refract(&unit_direction, &rec.normal, refraction_ratio)
+        };
         *ray_scattered = Ray {
             orig: rec.point.clone(),
-            dir: refracted,
+            dir: direction,
         };
 
         true
