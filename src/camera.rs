@@ -6,6 +6,7 @@ pub struct Camera {
     pub aspect_ratio: f64,
     pub image_width: u32,       // number of pixels
     pub samples_per_pixel: u32, // number of pixels
+    pub max_depth: i32,         // maximum number of ray bounces into scene
     image_height: u32,
     center: Point3, // Camera center
     pixel00_loc: Point3,
@@ -14,11 +15,17 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u32) -> Self {
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: u32,
+        samples_per_pixel: u32,
+        max_depth: i32,
+    ) -> Self {
         let mut camera = Camera::default();
         camera.aspect_ratio = aspect_ratio;
         camera.image_width = image_width;
         camera.samples_per_pixel = samples_per_pixel;
+        camera.max_depth = max_depth;
         camera.initialize();
         camera
     }
@@ -39,7 +46,7 @@ impl Camera {
                 let mut pixel_color = Color::default();
                 for sample in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
-                    pixel_color += &self.ray_color(&r, world);
+                    pixel_color += &self.ray_color(&r, self.max_depth, world);
                 }
 
                 let _ = write_color(&mut std::io::stdout(), &pixel_color, self.samples_per_pixel);
@@ -91,7 +98,10 @@ impl Camera {
         self.pixel00_loc = &viewport_upper_left + (&self.pixel_delta_u + &self.pixel_delta_v) * 0.5;
     }
 
-    fn ray_color(&self, ray: &Ray, hittables: &Hittables) -> Color {
+    fn ray_color(&self, ray: &Ray, depth: i32, hittables: &Hittables) -> Color {
+        if depth == 0 {
+            return Color::default();
+        }
         let mut rec = HitRecord::default();
         if hittables.hit(&ray, &mut Interval::new(0.0, INFINITY), &mut rec) {
             let direction = Vec3::random_unit_on_hemisphere(&rec.normal);
@@ -100,7 +110,7 @@ impl Camera {
                 dir: direction,
             };
 
-            return self.ray_color(&new_ray, hittables) * 0.5;
+            return self.ray_color(&new_ray, depth - 1, hittables) * 0.5;
             //return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
         }
         let unit_direction = unit_vector(&ray.dir);
