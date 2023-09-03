@@ -1,5 +1,6 @@
 use crate::utils::*;
 use crate::write_color;
+use crate::Scatter;
 use crate::{unit_vector, Color, HitRecord, Hittable, Hittables, Interval, Point3, Ray, Vec3};
 #[derive(Debug, Default)]
 pub struct Camera {
@@ -102,15 +103,17 @@ impl Camera {
         if depth == 0 {
             return Color::default();
         }
-        let mut rec = HitRecord::default();
+        let mut rec = HitRecord::new();
         if hittables.hit(&ray, &mut Interval::new(0.001, INFINITY), &mut rec) {
-            let direction = &rec.normal + Vec3::random_unit_vec3();
-            let new_ray = Ray {
-                orig: rec.point.clone(),
-                dir: direction,
-            };
-
-            return self.ray_color(&new_ray, depth - 1, hittables) * 0.5;
+            let mut scattered = Ray::default();
+            let mut attenuation = Color::default();
+            if rec
+                .material
+                .scatter(&ray, &rec, &mut attenuation, &mut scattered)
+            {
+                return &attenuation * &self.ray_color(&scattered, depth - 1, &hittables);
+            }
+            return Color::default();
         }
         let unit_direction = unit_vector(&ray.dir);
         let a = 0.5 * (unit_direction.y() + 1.0);

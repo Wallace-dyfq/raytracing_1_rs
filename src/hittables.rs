@@ -1,18 +1,30 @@
 use crate::interval::Interval;
 use crate::traits::{Hittable, Scatter};
+use crate::Lambertian;
 use crate::Point3;
 use crate::Ray;
 use crate::Vec3;
+use std::rc::Rc;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Clone)]
 pub struct HitRecord {
     pub point: Point3,
     pub normal: Vec3,
+    pub material: Rc<dyn Scatter>,
     pub t: f64,
     pub front_face: bool,
 }
 
 impl HitRecord {
+    pub fn new() -> Self {
+        Self {
+            point: Point3::default(),
+            normal: Vec3::default(),
+            material: Rc::new(Lambertian::default()),
+            t: 0.0,
+            front_face: false,
+        }
+    }
     // set the hit record normal vector,
     // assuming outward_normal has unit length, i.e., it is normalized
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
@@ -36,13 +48,13 @@ impl Hittables {
 
 impl Hittable for Hittables {
     fn hit(&self, ray: &Ray, ray_t: &mut Interval, hit_record: &mut HitRecord) -> bool {
-        let tmp_hit_record = &mut HitRecord::default();
         let mut hit_anything = false;
         for object in self.objects.iter() {
-            if object.hit(ray, ray_t, tmp_hit_record) {
+            let mut tmp_hit_record = HitRecord::new();
+            if object.hit(ray, ray_t, &mut tmp_hit_record) {
                 hit_anything = true;
                 ray_t.max = tmp_hit_record.t.clone();
-                *hit_record = tmp_hit_record.clone();
+                *hit_record = tmp_hit_record;
             }
         }
         hit_anything
