@@ -47,12 +47,16 @@ impl Vec3 {
     pub fn dot(&self, rhs: &Self) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
-    pub fn cross(&self, rhs: Self) -> Self {
+    pub fn cross(&self, rhs: &Self) -> Self {
         Vec3 {
             x: self.y * rhs.z - self.z * rhs.y,
             y: self.z * rhs.x - self.x * rhs.z,
             z: self.x * rhs.y - self.y * rhs.x,
         }
+    }
+
+    pub fn convert_to_unit_vector(&mut self) {
+        *self /= self.length()
     }
 
     pub fn make_unit_vector(&self) -> Self {
@@ -96,15 +100,20 @@ impl Vec3 {
         self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
     }
 
+    // reflection of light
     pub fn reflect(v: &Vec3, n: &Vec3) -> Self {
         let tmplength = 2.0 * v.dot(&n);
         v - &(n * tmplength)
     }
 
+    // reverse the given Vec3, i.e., multiple each element by -1.0
+    // like reverse the direction
     pub fn reverse(&self) -> Self {
         self * (-1.0)
     }
 
+    // refraction of light
+    // uv must be a unit vector so that the internal calculation of cos_theta holds
     pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Self {
         let cos_theta = uv.reverse().dot(n).min(1.0);
         let r_out_perp: Vec3 = etai_over_etat * (uv + cos_theta * n);
