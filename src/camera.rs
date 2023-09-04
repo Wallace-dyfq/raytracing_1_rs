@@ -56,14 +56,8 @@ impl Camera {
                 let pixel_center = &self.pixel00_loc
                     + (&self.pixel_delta_u * i as f64)
                     + (&self.pixel_delta_v * j as f64);
-
-                let ray_direction = &pixel_center - &self.center;
-                let ray = Ray {
-                    orig: self.center.clone(),
-                    dir: ray_direction,
-                };
                 let mut pixel_color = Color::default();
-                for sample in 0..self.samples_per_pixel {
+                for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
                     pixel_color += &self.ray_color(&r, self.max_depth, world);
                 }
