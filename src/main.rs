@@ -26,6 +26,29 @@ use vec3::{Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
+// A helper function to randomly pick a material
+fn get_rand_material() -> Rc<dyn Scatter> {
+    let choose_mat = utils::random_f64();
+    match choose_mat {
+        x if x < 0.8 => {
+            // difuse
+            Rc::new(Lambertian::new(
+                &Color::random(0.0, 1.0) * &Color::random(0.0, 1.0),
+            ))
+        }
+        x if x < 0.95 => {
+            // matel
+            let albedo = Color::random(0.5, 1.0);
+            let fuzz = utils::random_f64_range(0.0, 0.5);
+            Rc::new(Metal::new(albedo, fuzz))
+        }
+        _ => {
+            // glass
+            Rc::new(Dielectric::new(1.5))
+        }
+    }
+}
+
 fn main() -> Result<()> {
     let arg1 = env::args().nth(1);
     let output_fname = if let Some(fname) = arg1 {
@@ -36,6 +59,7 @@ fn main() -> Result<()> {
     let file = File::create(output_fname)?;
     let mut writer = BufWriter::new(file);
     let mut world = Hittables::default();
+    // ground
     //meterial
     let material_ground = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
     world.add(Box::new(Sphere::new(
@@ -44,43 +68,22 @@ fn main() -> Result<()> {
         material_ground.clone(),
     )));
 
+    // many small balls
     let count = 11;
     let p = Point3::new(4.0, 0.2, 0.0);
     for a in -count..count {
         for b in -count..count {
-            let choose_mat = utils::random_f64();
             let center = Point3::new(
                 a as f64 + utils::random_f64(),
                 0.2,
                 b as f64 + utils::random_f64(),
             );
-
             if (&center - &p).length() > 0.9 {
-                match choose_mat {
-                    x if x < 0.8 => {
-                        // difuse
-                        let sphere_material = Rc::new(Lambertian::new(
-                            &Color::random(0.0, 1.0) * &Color::random(0.0, 1.0),
-                        ));
-                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material.clone())));
-                    }
-                    x if x < 0.95 => {
-                        // matel
-                        let albedo = Color::random(0.5, 1.0);
-                        let fuzz = utils::random_f64_range(0.0, 0.5);
-                        let sphere_material = Rc::new(Metal::new(albedo, fuzz));
-                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material.clone())));
-                    }
-                    _ => {
-                        // glass
-                        let sphere_material = Rc::new(Dielectric::new(1.5));
-                        world.add(Box::new(Sphere::new(center, 0.2, sphere_material.clone())));
-                    }
-                };
+                world.add(Box::new(Sphere::new(center, 0.2, get_rand_material())));
             }
         }
     }
-
+    // a few big balls
     let material_1 = Rc::new(Dielectric::new(1.5));
     world.add(Box::new(Sphere::new(
         Point3::new(0.0, 1.0, 0.0),
@@ -100,13 +103,14 @@ fn main() -> Result<()> {
         material_3.clone(),
     )));
 
-    // camera
+    let image_width = 1200; // pixels
+                            // camera
     let mut camera = Camera::new(
         16.0 / 9.0,
-        1200,  /* image width*/
-        500,  /* sample per pixel */
-        50,   /* max depth */
-        20.0, /* vfov */
+        image_width, /* image width*/
+        500,         /* sample per pixel */
+        50,          /* max depth */
+        20.0,        /* vfov */
     );
     camera.look_from = Point3::new(13.0, 2.0, 3.0);
     camera.look_at = Point3::new(0.0, 0.0, 0.0);

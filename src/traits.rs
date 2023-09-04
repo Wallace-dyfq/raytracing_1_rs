@@ -3,7 +3,6 @@ use crate::Color;
 use crate::HitRecord;
 use crate::Ray;
 pub trait Hittable {
-    //TODO: make it return Option of HitRecord
     fn hit(&self, ray: &Ray, ray_t: &mut Interval) -> Option<HitRecord>;
 }
 
