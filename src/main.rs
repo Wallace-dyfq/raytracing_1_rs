@@ -18,14 +18,23 @@ use interval::Interval;
 use material::{Dielectric, Lambertian, Metal};
 use ray::Ray;
 use sphere::Sphere;
+use std::fs::File;
+use std::io::BufWriter;
 use std::rc::Rc;
 use traits::{Hittable, Scatter};
 use vec3::{Point3, Vec3};
 pub type Error = Box<dyn std::error::Error>;
 pub type Result<T> = std::result::Result<T, Error>;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
+fn main() -> Result<()> {
+    let arg1 = env::args().nth(1);
+    let output_fname = if let Some(fname) = arg1 {
+        fname
+    } else {
+        "images/image_0.ppm".to_string()
+    };
+    let file = File::create(output_fname)?;
+    let mut writer = BufWriter::new(file);
     let mut world = Hittables::default();
     //meterial
     let material_ground = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
@@ -35,9 +44,10 @@ fn main() {
         material_ground.clone(),
     )));
 
+    let count = 11;
     let p = Point3::new(4.0, 0.2, 0.0);
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in -count..count {
+        for b in -count..count {
             let choose_mat = utils::random_f64();
             let center = Point3::new(
                 a as f64 + utils::random_f64(),
@@ -93,7 +103,7 @@ fn main() {
     // camera
     let mut camera = Camera::new(
         16.0 / 9.0,
-        1200, /* image width*/
+        1200,  /* image width*/
         500,  /* sample per pixel */
         50,   /* max depth */
         20.0, /* vfov */
@@ -102,5 +112,10 @@ fn main() {
     camera.look_at = Point3::new(0.0, 0.0, 0.0);
     camera.defocus_angle = 0.6;
     camera.focus_dist = 10.0;
-    camera.render(&world);
+    if let Ok(()) = camera.render(&world, &mut writer) {
+        println!("Program runs Ok");
+    } else {
+        eprintln!("Program runs NOT Ok");
+    }
+    Ok(())
 }

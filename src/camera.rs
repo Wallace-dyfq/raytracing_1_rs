@@ -1,7 +1,8 @@
 use crate::utils::*;
 use crate::write_color;
-use crate::Scatter;
-use crate::{Color, HitRecord, Hittable, Hittables, Interval, Point3, Ray, Vec3};
+use crate::Result;
+use crate::{Color, Hittable, Hittables, Interval, Point3, Ray, Vec3};
+use std::io::Write;
 #[derive(Debug, Default)]
 pub struct Camera {
     pub aspect_ratio: f64,
@@ -48,23 +49,29 @@ impl Camera {
         camera
     }
 
-    pub fn render(&mut self, world: &Hittables) {
+    // rdner world and write result to writter
+    pub fn render<W>(&mut self, world: &Hittables, writer: &mut W) -> Result<()>
+    where
+        W: Write,
+    {
         self.initialize();
-        println!("P3\n{} {}\n255", self.image_width, self.image_height);
+        write!(
+            writer,
+            "P3\n{} {}\n255\n",
+            self.image_width, self.image_height
+        )?;
         for j in 0..self.image_height {
             for i in 0..self.image_width {
-                let pixel_center = &self.pixel00_loc
-                    + (&self.pixel_delta_u * i as f64)
-                    + (&self.pixel_delta_v * j as f64);
                 let mut pixel_color = Color::default();
                 for _ in 0..self.samples_per_pixel {
                     let r = self.get_ray(i, j);
                     pixel_color += &self.ray_color(&r, self.max_depth, world);
                 }
 
-                let _ = write_color(&mut std::io::stdout(), &pixel_color, self.samples_per_pixel);
+                write_color(writer, &pixel_color, self.samples_per_pixel)?;
             }
         }
+        Ok(())
     }
 
     fn get_ray(&self, i: u32, j: u32) -> Ray {

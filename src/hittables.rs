@@ -48,11 +48,9 @@ impl Hittables {
 
 impl Hittable for Hittables {
     fn hit(&self, ray: &Ray, ray_t: &mut Interval) -> Option<HitRecord> {
-        let mut hit_anything = false;
         let mut hit_record = None;
         for object in self.objects.iter() {
             if let Some(tmp_hit_record) = object.hit(ray, ray_t) {
-                hit_anything = true;
                 ray_t.max = tmp_hit_record.t.clone();
                 hit_record = Some(tmp_hit_record);
             }
